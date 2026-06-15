@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quy trình skincare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap&subset=vietnamese" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#FFF7F0; --bg2:#EDF6F3; --card:#FFFFFF;
+    --ink:#1E3A36; --muted:#6E8783;
+    --sun:#FF9D63; --sun-soft:#FFE6D6;
+    --mint:#3FAE9B; --mint-soft:#DBF1EC;
+    --line:#E7EFEC; --shadow:0 10px 30px -12px rgba(30,58,54,.18);
+    --illusA:#F6FBFA; --illusB:#EAF5F2;
+  }
+  body.night{
+    --bg1:#16263A; --bg2:#101B2A; --card:#1F3040;
+    --ink:#EAF1F5; --muted:#9CB2C0;
+    --sun:#FFB07E; --sun-soft:#3A3A46;
+    --mint:#5FC9B6; --mint-soft:#26404A;
+    --line:#2C3F4E; --shadow:0 12px 34px -12px rgba(0,0,0,.55);
+    --illusA:#243748; --illusB:#1B2A38;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:var(--ink);
+    background:linear-gradient(170deg,var(--bg1),var(--bg2));
+    background-attachment:fixed;min-height:100vh;line-height:1.55;
+    padding:0 18px 60px;transition:background .5s,color .4s;
+  }
+  .wrap{max-width:480px;margin:0 auto}
+
+  .topbar{display:flex;justify-content:center;padding:22px 0 4px}
+  .clock{
+    display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;
+    color:var(--muted);background:var(--card);border:1px solid var(--line);
+    padding:6px 13px;border-radius:30px;box-shadow:var(--shadow);
+  }
+  .clock .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  .hero{padding:18px 4px 22px;text-align:center}
+  .orb{width:60px;height:60px;margin:0 auto 16px;display:block}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--mint);font-weight:700;margin-bottom:10px}
+  .hero h1{font-family:"Fraunces",serif;font-weight:600;font-size:36px;line-height:1.06;letter-spacing:-.01em}
+  .hero h1 em{font-style:italic;font-weight:500;color:var(--sun)}
+  .hero p{color:var(--muted);font-size:13.5px;margin-top:11px;max-width:300px;margin-left:auto;margin-right:auto}
+
+  /* TODAY BANNER */
+  .today{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:15px 17px;margin:0 0 22px;box-shadow:var(--shadow);
+    display:flex;gap:13px;align-items:flex-start;
+  }
+  .today .badge{
+    flex:none;width:48px;height:48px;border-radius:14px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;background:var(--mint-soft);color:var(--mint);
+    font-weight:700;line-height:1;
+  }
+  .today .badge .d{font-size:18px}
+  .today .badge .w{font-size:9px;letter-spacing:.05em;margin-top:2px;text-transform:uppercase}
+  .today-body{flex:1}
+  .today-body .lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:3px}
+  .today-body h4{font-family:"Fraunces",serif;font-size:16.5px;font-weight:600;margin-bottom:3px}
+  .today-body p{font-size:12.5px;color:var(--muted);line-height:1.45}
+  .today-body .pill{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:7px;background:var(--sun-soft);color:var(--sun)}
+
+  /* TOGGLE */
+  .toggle{
+    display:flex;gap:5px;background:var(--card);border:1px solid var(--line);
+    border-radius:40px;padding:5px;margin:8px auto 26px;max-width:280px;box-shadow:var(--shadow);
+  }
+  .toggle button{
+    flex:1;border:none;background:transparent;cursor:pointer;font-family:inherit;
+    font-size:14px;font-weight:700;color:var(--muted);padding:11px;border-radius:30px;
+    display:flex;align-items:center;justify-content:center;gap:7px;transition:.3s;
+  }
+  #tab-morning.active{background:var(--sun);color:#fff}
+  #tab-night.active{background:#33506B;color:#fff}
+  body.night #tab-night.active{background:#4E7CA6}
+
+  .panel{display:none;animation:fade .4s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .step{
+    background:var(--card);border:1px solid var(--line);border-radius:20px;padding:17px;
+    display:flex;gap:15px;align-items:center;box-shadow:var(--shadow);position:relative;margin-bottom:13px;transition:.3s;
+  }
+  .step.skip{opacity:.4;filter:grayscale(.5)}
+  .step.skip::after{content:"Bỏ qua tối nay";position:absolute;right:14px;top:-9px;font-size:10px;font-weight:700;color:#fff;background:var(--muted);padding:3px 9px;border-radius:20px}
+  .step.extra{border-color:var(--mint);box-shadow:0 0 0 2px var(--mint-soft),var(--shadow)}
+  .num{position:absolute;top:-9px;left:18px;color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:20px;background:var(--mint)}
+  .num.sun{background:var(--sun)}
+  .illus{flex:none;width:74px;height:74px;border-radius:16px;background:linear-gradient(160deg,var(--illusA),var(--illusB));display:flex;align-items:center;justify-content:center}
+  .step-body h3{font-family:"Fraunces",serif;font-size:18px;font-weight:600;margin-bottom:3px}
+  .step-body .prod{font-size:12px;color:var(--mint);font-weight:600;margin-bottom:5px}
+  .step-body .prod.sun{color:var(--sun)}
+  .step-body p{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .connector{height:13px;display:flex;justify-content:center}
+  .connector::before{content:"";width:2px;background:var(--line)}
+
+  .weekly{
+    margin-top:20px;background:var(--mint-soft);border-radius:18px;padding:16px 17px;
+  }
+  .weekly h4{font-family:"Fraunces",serif;font-size:16px;margin-bottom:11px;display:flex;align-items:center;gap:8px}
+  .weekly .item{display:flex;gap:11px;align-items:flex-start;font-size:12.5px;color:var(--ink);margin-bottom:9px;line-height:1.45}
+  .weekly .item:last-child{margin-bottom:0}
+  .weekly .item.on{background:var(--card);border-radius:12px;padding:9px 11px;margin-left:-6px;margin-right:-6px;box-shadow:var(--shadow)}
+  .weekly .tag{flex:none;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--card);color:var(--mint);border:1px solid var(--line)}
+  .weekly .item.on .tag{background:var(--mint);color:#fff;border-color:var(--mint)}
+
+  footer{text-align:center;margin-top:30px;color:var(--muted);font-size:11.5px;line-height:1.6}
+  footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="clock"><span class="dot"></span><span id="clock">--:--</span> · Giờ VN</span>
+  </div>
+
+  <header class="hero">
+    <div id="orb"></div>
+    <div class="eyebrow" id="eyebrow">Routine</div>
+    <h1><span id="greeting">Chào bạn</span>,<br><em id="greet-em">làn da khoẻ</em></h1>
+    <p id="hero-sub">Da dầu &amp; mờ thâm. Gạt nút để xem quy trình sáng hoặc tối.</p>
+  </header>
+
+  <!-- TODAY -->
+  <div class="today">
+    <div class="badge"><span class="d" id="today-date">--</span><span class="w" id="today-dow">--</span></div>
+    <div class="today-body">
+      <div class="lbl">Hôm nay</div>
+      <h4 id="today-title">Đang tải…</h4>
+      <p id="today-note"></p>
+      <span class="pill" id="today-pill" style="display:none"></span>
+    </div>
+  </div>
+
+  <div class="toggle">
+    <button id="tab-morning" onclick="setMode('morning')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.5v2.5"/><path d="M12 19v2.5"/><path d="M2.5 12H5"/><path d="M19 12h2.5"/><path d="M5.2 5.2l1.8 1.8"/><path d="M17 17l1.8 1.8"/><path d="M18.8 5.2L17 7"/><path d="M7 17l-1.8 1.8"/></g></svg>
+      Sáng
+    </button>
+    <button id="tab-night" onclick="setMode('night')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="currentColor"/></svg>
+      Tối
+    </button>
+  </div>
+
+  <!-- MORNING -->
+  <section class="panel" id="morning">
+    <div class="step">
+      <span class="num">BƯỚC 1</span>
+      <div class="illus">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+          <rect x="16" y="14" width="16" height="26" rx="5" fill="#3FAE9B"/><rect x="19" y="8" width="10" height="8" rx="2.5" fill="#2C8C7C"/>
+          <circle cx="11" cy="13" r="3.2" fill="#BFE8E0"/><circle cx="38" cy="11" r="2.4" fill="#BFE8E0"/><circle cx="9" cy="22" r="2.2" fill="#BFE8E0"/><circle cx="40" cy="19" r="3" fill="#BFE8E0"/>
+          <path d="M21 26h6M21 30h6" stroke="#EAF5F2" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="step-body"><h3>Rửa mặt</h3><div class="prod">Sữa rửa mặt</div><p>Nước mát, massage nhẹ ~30 giây rồi rửa sạch. Sáng không cần tẩy trang.</p></div>
+    </div>
+    <div class="connector"></div>
+    <div class="step">
+      <span class="num">BƯỚC 2</span>
+      <div class="illus">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><rect x="13" y="20" width="22" height="18" rx="5" fill="#5AB7E0"/><rect x="16" y="12" width="16" height="9" rx="3" fill="#3F97C4"/><path d="M24 25c2.8 3 4.2 4.8 4.2 6.6a4.2 4.2 0 1 1-8.4 0c0-1.8 1.4-3.6 4.2-6.6z" fill="#DCF1FB"/></svg>
+      </div>
+      <div class="step-body"><h3>Dưỡng ẩm</h3><div class="prod">Garnier Gel xanh dương</div><p>Lượng bằng hạt đậu, tán đều. Gel mỏng nhẹ, thấm nhanh, không nhờn.</p></div>
+    </div>
+    <div class="connector"></div>
+    <div class="step">
+      <span class="num sun">BƯỚC 3</span>
+      <div class="illus">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><rect x="14" y="18" width="20" height="22" rx="6" fill="#FF9D63"/><rect x="20" y="9" width="8" height="9" rx="2" fill="#E07B45"/><circle cx="24" cy="29" r="6.5" fill="#FFE6D6"/><g stroke="#FFE6D6" stroke-width="1.8" stroke-linecap="round"><path d="M24 19v3"/><path d="M24 36v3"/><path d="M14 29h3"/><path d="M31 29h3"/></g></svg>
+      </div>
+      <div class="step-body"><h3>Kem chống nắng</h3><div class="prod sun">Men Stay · SPF50 PA++++</div><p>Đợi gel thấm ~1 phút. Thoa ~2 đốt ngón tay, trước khi ra ngoài 15–20 phút.</p></div>
+    </div>
+    <footer>Thoa lại kem chống nắng sau 3–4 tiếng nếu ra nắng nhiều ☀️</footer>
+  </section>
+
+  <!-- NIGHT -->
+  <section class="panel" id="night">
+    <div class="step">
+      <span class="num">BƯỚC 1</span>
+      <div class="illus">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><circle cx="15" cy="30" r="9" fill="#EAF0F4" stroke="#C4D3DD" stroke-width="1.5"/><rect x="27" y="13" width="13" height="25" rx="4" fill="#7E8CC4"/><rect x="30" y="7" width="7" height="7" rx="2" fill="#5C69A6"/><path d="M30 24h7M30 28h7" stroke="#EDF0FB" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="step-body"><h3>Tẩy trang</h3><div class="prod">Nước tẩy trang + bông</div><p>Lau nhẹ cả mặt, kể cả ngày không trang điểm (vì có kem chống nắng ban ngày).</p></div>
+    </div>
+    <div class="connector"></div>
+    <div class="step">
+      <span class="num">BƯỚC 2</span>
+      <div class="illus">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><rect x="16" y="14" width="16" height="26" rx="5" fill="#3FAE9B"/><rect x="19" y="8" width="10" height="8" rx="2.5" fill="#2C8C7C"/><circle cx="11" cy="13" r="3.2" fill="#BFE8E0"/><circle cx="38" cy="11" r="2.4" fill="#BFE8E0"/><path d="M21 26h6M21 30h6" stroke="#EAF5F2" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="step-body"><h3>Rửa mặt</h3><div class="prod">Sữa rửa mặt</div><p>Rửa lại lần nữa cho sạch sâu lớp dầu và bụi trong ngày.</p></div>
+    </div>
+    <div class="connector"></div>
+    <!-- BEUSCRUB (chèn động theo lịch) -->
+    <div id="beuscrub-block" style="display:none">
+      <div class="step extra">
+        <span class="num">+ TUẦN</span>
+        <div class="illus">
+          <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><rect x="15" y="18" width="18" height="22" rx="5" fill="#9AD0C2"/><rect x="18" y="10" width="12" height="9" rx="3" fill="#6FB3A2"/><circle cx="20" cy="28" r="1.8" fill="#fff"/><circle cx="26" cy="26" r="1.6" fill="#fff"/><circle cx="24" cy="33" r="2" fill="#fff"/><circle cx="29" cy="31" r="1.4" fill="#fff"/></svg>
+        </div>
+        <div class="step-body"><h3>Tẩy da chết</h3><div class="prod">Beuscrub</div><p>Làm sau bước rửa mặt khi da còn ẩm. Massage nhẹ rồi rửa lại. <b>Tối nay bỏ serum.</b></p></div>
+      </div>
+      <div class="connector"></div>
+    </div>
+    <!-- SERUM -->
+    <div id="serum-block">
+      <div class="step">
+        <span class="num">BƯỚC 3</span>
+        <div class="illus">
+          <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><rect x="18" y="20" width="12" height="20" rx="3" fill="#C98A4B"/><rect x="20" y="6" width="8" height="8" rx="2" fill="#5A4632"/><rect x="22" y="13" width="4" height="9" fill="#5A4632"/><path d="M24 40c2 2.4 3 3.8 3 5.2a3 3 0 1 1-6 0c0-1.4 1-2.8 3-5.2z" fill="#F4D9A8"/></svg>
+        </div>
+        <div class="step-body"><h3>Serum trị thâm</h3><div class="prod">Coonme Perfect White</div><p>2–3 giọt, vỗ nhẹ cho thấm. Có AHA — vài đêm đầu hơi châm chích nhẹ là bình thường.</p></div>
+      </div>
+      <div class="connector"></div>
+    </div>
+    <!-- NOSE MASK (chèn động) -->
+    <div id="nose-block" style="display:none">
+      <div class="step extra">
+        <span class="num">+ TUẦN</span>
+        <div class="illus">
+          <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><path d="M24 12c5 0 9 4 9 10 0 7-5 14-9 14s-9-7-9-14c0-6 4-10 9-10z" fill="#E8C9A0"/><rect x="20" y="20" width="8" height="11" rx="3" fill="#C9A877"/></svg>
+        </div>
+        <div class="step-body"><h3>Mặt nạ mũi</h3><div class="prod">BABREA</div><p>Chỉ dán vùng mũi. Hôm nay cho da nghỉ — <b>bỏ cả serum &amp; Beuscrub.</b></p></div>
+      </div>
+      <div class="connector"></div>
+    </div>
+    <div class="step">
+      <span class="num">BƯỚC CUỐI</span>
+      <div class="illus">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><rect x="13" y="20" width="22" height="18" rx="5" fill="#5AB7E0"/><rect x="16" y="12" width="16" height="9" rx="3" fill="#3F97C4"/><path d="M24 25c2.8 3 4.2 4.8 4.2 6.6a4.2 4.2 0 1 1-8.4 0c0-1.8 1.4-3.6 4.2-6.6z" fill="#DCF1FB"/></svg>
+      </div>
+      <div class="step-body"><h3>Dưỡng ẩm</h3><div class="prod">Garnier Gel xanh dương</div><p>Đợi serum thấm ~1 phút rồi khoá ẩm. Da dầu vẫn cần bước này.</p></div>
+    </div>
+
+    <div class="weekly">
+      <h4>🗓️ Lịch trong tuần (buổi tối)</h4>
+      <div class="item" id="wk-beuscrub"><span class="tag">Thứ 3</span><span><b>Tẩy da chết Beuscrub:</b> làm sau bước rửa mặt (da còn ẩm). Tối đó <b>bỏ serum</b> để tránh kích ứng.</span></div>
+      <div class="item" id="wk-nose"><span class="tag">Chủ nhật</span><span><b>Mặt nạ mũi BABREA:</b> chỉ vùng mũi. Ngày này <b>bỏ cả serum &amp; Beuscrub</b> cho da nghỉ.</span></div>
+    </div>
+    <footer>Beuscrub vào <b>Thứ 3</b> · Mặt nạ mũi vào <b>Chủ nhật</b> · các tối còn lại dùng serum 🌙</footer>
+  </section>
+
+</div>
+
+<script>
+  // === Lịch tuần: 0=CN,1=T2,...6=T7 ===
+  var BEUSCRUB_DAY = 2; // Thứ 3
+  var NOSE_DAY = 0;     // Chủ nhật
+  var DOW = ['CN','T2','T3','T4','T5','T6','T7'];
+  var DOW_FULL = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+
+  function vnParts(){
+    return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Ho_Chi_Minh',weekday:'short',day:'numeric',hour:'numeric',hourCycle:'h23'}).formatToParts(new Date());
+  }
+  function vnHour(){ return parseInt(vnParts().find(x=>x.type==='hour').value,10); }
+  function vnDay(){
+    // map JS weekday from VN date
+    var wd = new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Ho_Chi_Minh',weekday:'short'}).format(new Date());
+    return {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[wd];
+  }
+  function vnDate(){ return vnParts().find(x=>x.type==='day').value; }
+
+  function tick(){
+    var f = new Intl.DateTimeFormat('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+    document.getElementById('clock').textContent = f.format(new Date());
+  }
+
+  var sunOrb = '<svg class="orb" viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="13" fill="#FF9D63"/><g stroke="#FF9D63" stroke-width="3.4" stroke-linecap="round"><path d="M32 4v8"/><path d="M32 52v8"/><path d="M4 32h8"/><path d="M52 32h8"/><path d="M11.7 11.7l5.7 5.7"/><path d="M46.6 46.6l5.7 5.7"/><path d="M52.3 11.7l-5.7 5.7"/><path d="M17.4 46.6l-5.7 5.7"/></g></svg>';
+  var moonOrb = '<svg class="orb" viewBox="0 0 64 64" fill="none"><path d="M52 38A22 22 0 1 1 26 12a17 17 0 0 0 26 26z" fill="#9DB8E0"/><circle cx="46" cy="16" r="1.8" fill="#E6EEFB"/><circle cx="52" cy="24" r="1.2" fill="#E6EEFB"/><circle cx="40" cy="10" r="1.2" fill="#E6EEFB"/></svg>';
+
+  function applySchedule(){
+    var day = vnDay();
+    var isBeuscrub = day === BEUSCRUB_DAY;
+    var isNose = day === NOSE_DAY;
+
+    // chèn/ẩn block trong quy trình tối
+    document.getElementById('beuscrub-block').style.display = isBeuscrub ? 'block' : 'none';
+    document.getElementById('nose-block').style.display = isNose ? 'block' : 'none';
+    // serum bị bỏ vào ngày Beuscrub hoặc Mặt nạ mũi
+    var serumOff = isBeuscrub || isNose;
+    var serum = document.getElementById('serum-block');
+    serum.style.display = serumOff ? 'none' : 'block';
+
+    // highlight item trong lịch
+    document.getElementById('wk-beuscrub').classList.toggle('on', isBeuscrub);
+    document.getElementById('wk-nose').classList.toggle('on', isNose);
+
+    // badge
+    document.getElementById('today-date').textContent = vnDate();
+    document.getElementById('today-dow').textContent = DOW[day];
+
+    // banner nội dung
+    var title, note, pill='';
+    if(isNose){
+      title = 'Đêm mặt nạ mũi 💆';
+      note = 'Tối nay dán mặt nạ mũi BABREA. Cho da nghỉ — bỏ serum & Beuscrub.';
+      pill = 'Bỏ serum + Beuscrub';
+    } else if(isBeuscrub){
+      title = 'Đêm tẩy da chết ✨';
+      note = 'Tối nay dùng Beuscrub sau bước rửa mặt. Bỏ serum để da không bị kích ứng.';
+      pill = 'Bỏ serum tối nay';
+    } else {
+      title = 'Đêm dưỡng serum 🌙';
+      note = 'Quy trình tối tiêu chuẩn: làm sạch → serum trị thâm → khoá ẩm.';
+    }
+    document.getElementById('today-title').textContent = title;
+    document.getElementById('today-note').textContent = note;
+    var p = document.getElementById('today-pill');
+    if(pill){ p.textContent = pill; p.style.display='inline-block'; } else { p.style.display='none'; }
+  }
+
+  function setMode(mode){
+    var night = mode==='night';
+    document.body.classList.toggle('night', night);
+    document.getElementById('morning').classList.toggle('active', !night);
+    document.getElementById('night').classList.toggle('active', night);
+    document.getElementById('tab-morning').classList.toggle('active', !night);
+    document.getElementById('tab-night').classList.toggle('active', night);
+    document.getElementById('orb').innerHTML = night ? moonOrb : sunOrb;
+    document.getElementById('eyebrow').textContent = night ? 'Routine buổi tối' : 'Routine buổi sáng';
+    document.getElementById('greeting').textContent = night ? 'Chào buổi tối' : 'Chào buổi sáng';
+    document.getElementById('greet-em').textContent = night ? 'thư giãn nhé' : 'làn da khoẻ';
+    document.getElementById('hero-sub').textContent = night
+      ? 'Da dầu & mờ thâm. Làm sạch, trị thâm rồi khoá ẩm.'
+      : 'Da dầu & mờ thâm. Làm sạch, cấp ẩm rồi chống nắng.';
+  }
+
+  tick(); setInterval(tick, 30000);
+  applySchedule();
+  var h = vnHour();
+  setMode(h>=5 && h<18 ? 'morning' : 'night');
+</script>
+</body>
+</html>
