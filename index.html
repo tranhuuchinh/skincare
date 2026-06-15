@@ -80,8 +80,8 @@
     display:flex;flex-direction:column;align-items:center;
   }
   .fc-card.today{border-color:var(--mint);box-shadow:0 0 0 2px var(--mint-soft),var(--shadow)}
-  .fc-card .fc-top{height:16px;display:flex;align-items:center;justify-content:center;margin-bottom:3px}
-  .fc-card .fc-now{font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  .fc-card .fc-now{position:absolute;top:-9px;left:50%;transform:translateX(-50%);z-index:2;
+    font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;line-height:1.4;
     color:#fff;background:var(--mint);padding:2px 9px;border-radius:20px;white-space:nowrap}
   .fc-card .fc-dow{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
   .fc-card.today .fc-dow{color:var(--mint)}
@@ -368,7 +368,7 @@
       var dow = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[wd];
       var r = routineOf(dow);
       html += '<div class="fc-card '+r.cls+(i===0?' today':'')+'">'
-        + '<div class="fc-top">'+(i===0?'<span class="fc-now">Hôm nay</span>':'')+'</div>'
+        + (i===0?'<span class="fc-now">Hôm nay</span>':'')
         + '<div class="fc-dow">'+DOW[dow]+'</div>'
         + '<div class="fc-day">'+dayNum+'</div>'
         + '<div class="fc-ico">'+r.ico+'</div>'
