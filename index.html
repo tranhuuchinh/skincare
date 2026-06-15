@@ -69,6 +69,23 @@
   .today-body p{font-size:12.5px;color:var(--muted);line-height:1.45}
   .today-body .pill{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:7px;background:var(--sun-soft);color:var(--sun)}
 
+  /* FORECAST 7 NGÀY */
+  .forecast{margin:0 0 24px}
+  .forecast .fc-head{display:flex;align-items:center;gap:8px;font-family:"Fraunces",serif;font-size:15px;font-weight:600;margin:0 2px 11px;color:var(--ink)}
+  .fc-scroll{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .fc-scroll::-webkit-scrollbar{display:none}
+  .fc-card{
+    flex:none;width:84px;background:var(--card);border:1px solid var(--line);border-radius:15px;
+    padding:11px 9px;text-align:center;box-shadow:var(--shadow);
+  }
+  .fc-card.today{border-color:var(--mint);box-shadow:0 0 0 2px var(--mint-soft),var(--shadow)}
+  .fc-card .fc-dow{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+  .fc-card.today .fc-dow{color:var(--mint)}
+  .fc-card .fc-day{font-family:"Fraunces",serif;font-size:21px;font-weight:600;line-height:1.1;margin:1px 0 8px}
+  .fc-card .fc-ico{font-size:20px;line-height:1;margin-bottom:5px}
+  .fc-card .fc-lbl{font-size:10px;font-weight:600;color:var(--ink);line-height:1.25}
+  .fc-card .fc-tag{display:block;font-size:9px;font-weight:700;color:var(--sun);margin-top:3px}
+
   /* TOGGLE */
   .toggle{
     display:flex;gap:5px;background:var(--card);border:1px solid var(--line);
@@ -141,6 +158,12 @@
       <p id="today-note"></p>
       <span class="pill" id="today-pill" style="display:none"></span>
     </div>
+  </div>
+
+  <!-- FORECAST 7 NGÀY -->
+  <div class="forecast">
+    <div class="fc-head">🔮 7 ngày tới (buổi tối)</div>
+    <div class="fc-scroll" id="fc-scroll"></div>
   </div>
 
   <div class="toggle">
@@ -322,6 +345,34 @@
     if(pill){ p.textContent = pill; p.style.display='inline-block'; } else { p.style.display='none'; }
   }
 
+  function routineOf(day){
+    if(day === NOSE_DAY)     return {ico:'💆', lbl:'Mặt nạ mũi', tag:'bỏ serum'};
+    if(day === BEUSCRUB_DAY) return {ico:'✨', lbl:'Tẩy da chết', tag:'bỏ serum'};
+    return {ico:'🌙', lbl:'Serum trị thâm', tag:''};
+  }
+  function buildForecast(){
+    var now = new Date();
+    var todayDay = vnDay();
+    var html = '';
+    for(var i=0;i<7;i++){
+      var d = new Date(now.getTime() + i*86400000);
+      var parts = new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Ho_Chi_Minh',weekday:'short',day:'numeric'}).formatToParts(d);
+      var wd = parts.find(x=>x.type==='weekday').value;
+      var dayNum = parts.find(x=>x.type==='day').value;
+      var dow = {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[wd];
+      var r = routineOf(dow);
+      var label = i===0 ? 'Hôm nay' : DOW[dow];
+      html += '<div class="fc-card'+(i===0?' today':'')+'">'
+        + '<div class="fc-dow">'+label+'</div>'
+        + '<div class="fc-day">'+dayNum+'</div>'
+        + '<div class="fc-ico">'+r.ico+'</div>'
+        + '<div class="fc-lbl">'+r.lbl+'</div>'
+        + (r.tag?'<span class="fc-tag">'+r.tag+'</span>':'')
+        + '</div>';
+    }
+    document.getElementById('fc-scroll').innerHTML = html;
+  }
+
   function setMode(mode){
     var night = mode==='night';
     document.body.classList.toggle('night', night);
@@ -340,6 +391,7 @@
 
   tick(); setInterval(tick, 30000);
   applySchedule();
+  buildForecast();
   var h = vnHour();
   setMode(h>=5 && h<18 ? 'morning' : 'night');
 </script>
